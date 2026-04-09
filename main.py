@@ -1,30 +1,46 @@
 import sys
 import os
 
-# Instruções
-instructions = {"ADD", "MUL", "SUB", "MOV", "LDR", "STR", "NOP", "HALT", "AND", "ORR", "NOT", "XOR"}
+from utils import print_err, print_warn, bits_to_hex, error_warning
+from parser import parse_line
 
 
+def main():
+    if len(sys.argv) > 3:
+        print_err("Argumento extra fornecido. Uso: main.py <dest> <source>")
+    if len(sys.argv) < 3:
+        print_err("Argumentos insuficientes. Uso: main.py <dest> <source>")
 
-def print_err(text: str):
-    print("ERR:", str)
-    exit()
+    out_path = sys.argv[1]
+    src_path = sys.argv[2]
 
-# Tratando argumentos
-if not sys.argv[1] or not sys.argv[2]:
-    print_err("Faltam argumentos a se fornecer.")
+    if out_path.startswith("-") or src_path.startswith("-"):
+        print_err("Nenhum argumento aceita modificadores '-'")
 
-arg1 = sys.argv[1]
-arg2 = sys.argv[2]
-if sys.argv[3]:
-    print_err("Argumento extra fornecido.")
+    if not os.path.isfile(src_path):
+        print_err(f"Arquivo de origem não encontrado: '{src_path}'")
 
-if not os.path.isfile(arg2):
-    print_err("Arquivo de origem fornecido não existe")
+    with open(src_path, "r") as f:
+        raw_lines = f.read().upper().splitlines()
+
+    encoded: list[str] = []
+
+    for line_num, line in enumerate(raw_lines, start=1):
+        result = parse_line(line, line_num)
+        if result is None:
+            continue
+        encoded.append(bits_to_hex(result))
+
+    if not encoded:
+        print_warn("Nenhuma instrução encontrada no arquivo fonte.")
+
+    with open(out_path, "w") as f:
+        for word in encoded:
+            f.write(word + "\n")
+
+    status = "Assembler montou com avisos" if error_warning else "Montagem perfeita"
+    print(f"{status}: {len(encoded)} {"instrução" if not len(raw_lines) > 1 else "instruções"} -> '{out_path}'")
 
 
-
-# Tratando modificadores do tipo -. (TODO)
-if arg1[0] == '-' or arg2 == '-':
-    print_err("Nenhum argumento aceita modificadores '-'.")
-
+if __name__ == "__main__":
+    main()
