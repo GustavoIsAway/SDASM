@@ -29,16 +29,13 @@ O SDASM gera arquivo .hex de instruções compatíveis com a tabela a seguir:
 ## Uso
 Para usá-lo simplesmente chame o comando com essa estrutura:
 
-    ```bash
     $ python3 -m sdasm.py (destino).hex (fonte).asm
-    ```
 
 em que fonte é o seu código .asm e o destino é o arquivo final. Convém que o destino sempre tenha extensão .hex.
 
-    **Exemplo**
-    ```bash
+**Exemplo**
+
     $ python3 -m sdasm.py main.hex main.asm
-    ```
     
 
 Isso gera hex code em ASCII puro, que pode ser diretamente colocado em projeto desenvolvido via Verilog ou Verilog + Vivado.
