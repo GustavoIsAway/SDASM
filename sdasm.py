@@ -7,15 +7,15 @@ from parser import parse_line
 
 def main():
     if len(sys.argv) > 3:
-        print_err("Argumento extra fornecido. Uso: main.py <dest> <source>")
+        print_err("Argumento extra fornecido. Uso: dasm.py <dest> <source>")
     if len(sys.argv) < 3:
-        print_err("Argumentos insuficientes. Uso: main.py <dest> <source>")
+        print_err("Argumentos insuficientes. Uso: dasm.py <dest> <source>")
 
     out_path = sys.argv[1]
     src_path = sys.argv[2]
 
     if out_path.startswith("-") or src_path.startswith("-"):
-        print_err("Nenhum argumento aceita modificadores '-'")
+        print_err("Nenhum argumento aceita modi`ficadores '-'")
 
     if not os.path.isfile(src_path):
         print_err(f"Arquivo de origem não encontrado: '{src_path}'")
