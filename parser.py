@@ -1,4 +1,6 @@
 from utils import reg_number, parse_immediate, parse_mem_ref, print_err, clean_token
+import re
+
 
 # Hash set de registradores
 REGISTERS = {f"R{i}" for i in range(8)}
@@ -158,11 +160,22 @@ def parse_line(line: str, line_num: int) -> int | None:
     if not line:
         return None
 
-    tokens = line.split()
-    mnemonic = tokens[0]
-    operands = tokens[1:]  # mantém vírgulas; cada encoder chama clean_token(), o que remove as vírgulas
+    # Encontra o mnemônico (primeira palavra)
+    # e depois divide os operandos por vírgulas, ele ignora os espaços
+
+    parts = line.split(None, 1)  # split apenas no primeiro espaço
+    mnemonic = parts[0]
+    
+    if len(parts) > 1:
+        # Divide por vírgulas e limpa espaços
+        operands = [op.strip() for op in parts[1].split(',')]
+        
+        # Remove strings vazias (caso tenha vírgula no final)
+        operands = [op for op in operands if op]
+    else:
+        operands = []
 
     if mnemonic not in ENCODERS:
         print_err(f"Ln {line_num} - Mnemônico desconhecido: '{mnemonic}'")
 
-    return ENCODERS[mnemonic](operands, line_num)   # Executa funções a partir dos ponteiros
+    return ENCODERS[mnemonic](operands, line_num)
