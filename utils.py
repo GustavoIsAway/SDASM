@@ -1,5 +1,10 @@
 import sys
 
+
+LABELS = {
+    "_START": 0x00
+}
+
 error_warning = 0
 
 def print_err(text: str):
@@ -48,6 +53,16 @@ def parse_mem_ref(token: str) -> str:
         print_err(f"Referência de memória inválida (esperado [Rn]): '{token}'")
     return token[1:-1]
 
+
 def bits_to_hex(value: int, width: int = 16) -> str:
     mask = (1 << width) - 1
-    return f"0x{(value & mask):04X}"
+    return f"{(value & mask):04X}"
+
+
+def check_for_subroutine(token: str, line: int) -> bool:
+    cleaned_token = token.rstrip()
+    if cleaned_token[-1] == ":" and not token[0].isdigit():
+        if cleaned_token[:-1] not in LABELS:
+            LABELS[cleaned_token[:-1]] = int(line) - 2
+        return True  # ← retorna True mesmo se já existia
+    return False

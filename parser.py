@@ -1,9 +1,9 @@
-from utils import reg_number, parse_immediate, parse_mem_ref, print_err, clean_token
-import re
-
+from utils import check_for_subroutine, reg_number, parse_immediate, parse_mem_ref, print_err, clean_token, LABELS, check_for_subroutine
 
 # Hash set de registradores
 REGISTERS = {f"R{i}" for i in range(8)}
+
+# Dicionário de subrotinas [nome][endereço]
 
 
 # Limpa string do registrador, tirando vírgulas e espaços extras. Se correta a sintaxe, devolve apenas o número do registrador como inteiro
@@ -131,6 +131,41 @@ def encode_NOT(tokens: list[str], ln: int) -> int:
     return (0b1001 << 12) | (rd << 8) | (rm << 5)
 
 
+def encode_JMP(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 1:
+        print_err(f"JMP espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    
+    im = clean_token(tokens[0])
+    
+
+    if im[:2] == "0X":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 16) << 2)
+        except ValueError:
+            print_err(f"Imediato hexadecimal {im} é inválido.")
+
+
+    if im[:2] == "0B":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 2) << 2)
+        except ValueError:
+            print_err(f"Imediato binário {im} é inválido.")
+    
+
+    if im[:2] == "0O":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 8) << 2)
+        except ValueError:
+            print_err(f"Imediato octal {im} é inválido.")
+
+
+    if im in LABELS:
+        return (0b00001 << 11) | (LABELS[im] << 2)
+    else:
+        print_err(f"Subrotina {im} não definida.")
+
+    return 0
+
 # Dicionário de dispatch (atualizar ela pra segunda metade das instruções, caso o Thiago queira)
 
 ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
@@ -146,6 +181,7 @@ ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "ORR":  encode_ORR,
     "NOT":  encode_NOT,
     "XOR":  encode_XOR,
+    "JMP":  encode_JMP,    
 }
 
 
@@ -160,22 +196,15 @@ def parse_line(line: str, line_num: int) -> int | None:
     if not line:
         return None
 
-    # Encontra o mnemônico (primeira palavra)
-    # e depois divide os operandos por vírgulas, ele ignora os espaços
-
-    parts = line.split(None, 1)  # split apenas no primeiro espaço
-    mnemonic = parts[0]
-    
-    if len(parts) > 1:
-        # Divide por vírgulas e limpa espaços
-        operands = [op.strip() for op in parts[1].split(',')]
-        
-        # Remove strings vazias (caso tenha vírgula no final)
-        operands = [op for op in operands if op]
-    else:
-        operands = []
+    tokens = line.split()
+    mnemonic = tokens[0]
+    operands = tokens[1:]  # mantém vírgulas; cada encoder chama clean_token(), o que remove as vírgulas
 
     if mnemonic not in ENCODERS:
-        print_err(f"Ln {line_num} - Mnemônico desconhecido: '{mnemonic}'")
+        if len(tokens) == 1:
+            if not check_for_subroutine(str(tokens[0]), line_num):
+                print_err(f"Ln {line_num} - Mnemônico desconhecido: '{mnemonic}'")
+            else:
+                return
 
-    return ENCODERS[mnemonic](operands, line_num)
+    return ENCODERS[mnemonic](operands, line_num)   # Executa funções a partir dos ponteiros
