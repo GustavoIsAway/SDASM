@@ -3,6 +3,8 @@ import os
 from utils import print_err, print_warn, bits_to_hex, error_warning
 from parser import LABELS, parse_line
 
+VERSION = 0.4
+
 
 def _is_label(line: str) -> str | None:
     stripped = line.strip()

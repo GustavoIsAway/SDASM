@@ -131,6 +131,125 @@ def encode_NOT(tokens: list[str], ln: int) -> int:
     return (0b1001 << 12) | (rd << 8) | (rm << 5)
 
 
+def encode_PSH(tokens: list[str], ln: int) -> int: 
+    return 0x0000
+
+def encode_POP(tokens: list[str], ln: int):
+    return 0x0000
+
+def encode_ASSOCIATE(tokens: list[str], ln: int):
+    return 0x0000
+
+
+def encode_JEQ(tokens: list[str], ln: int) -> int: 
+    if len(tokens) != 1:
+        print_err(f"JEQ espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    
+    im = clean_token(tokens[0])
+    
+
+    if im[:2] == "0X":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 16) << 2) | 0b01
+        except ValueError:
+            print_err(f"Imediato hexadecimal {im} é inválido.")
+
+
+    if im[:2] == "0B":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 2) << 2) | 0b01
+        except ValueError:
+            print_err(f"Imediato binário {im} é inválido.")
+    
+
+    if im[:2] == "0O":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 8) << 2) | 0b01
+        except ValueError:
+            print_err(f"Imediato octal {im} é inválido.")
+
+    # Checa se IM é texto, logo, uma label
+    if im in LABELS:
+        return (0b00001 << 11) | (LABELS[im] << 2) | 0b01
+    else:
+        print_err(f"Label {im} não definida.")
+
+    return 0
+    return 0x0000
+
+
+def encode_JGT(tokens: list[str], ln: int):
+    if len(tokens) != 1:
+        print_err(f"JGT espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    
+    im = clean_token(tokens[0])
+    
+
+    if im[:2] == "0X":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 16) << 2) | 0b11
+        except ValueError:
+            print_err(f"Imediato hexadecimal {im} é inválido.")
+
+
+    if im[:2] == "0B":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 2) << 2) | 0b11
+        except ValueError:
+            print_err(f"Imediato binário {im} é inválido.")
+    
+
+    if im[:2] == "0O":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 8) << 2) | 0b11
+        except ValueError:
+            print_err(f"Imediato octal {im} é inválido.")
+
+    # Checa se IM é texto, logo, uma label
+    if im in LABELS:
+        return (0b00001 << 11) | (LABELS[im] << 2) | 0b11
+    else:
+        print_err(f"Label {im} não definida.")
+
+    return 0
+
+
+def encode_JLT(tokens: list[str], ln: int):
+    if len(tokens) != 1:
+        print_err(f"JLT espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    
+    im = clean_token(tokens[0])
+    
+
+    if im[:2] == "0X":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 16) << 2) | 0b10
+        except ValueError:
+            print_err(f"Imediato hexadecimal {im} é inválido.")
+
+
+    if im[:2] == "0B":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 2) << 2) | 0b10
+        except ValueError:
+            print_err(f"Imediato binário {im} é inválido.")
+    
+
+    if im[:2] == "0O":
+        try:
+            return (0b00001 << 11) | (int(im[2:], 8) << 2) | 0b10
+        except ValueError:
+            print_err(f"Imediato octal {im} é inválido.")
+
+    # Checa se IM é texto, logo, uma label
+    if im in LABELS:
+        return (0b00001 << 11) | (LABELS[im] << 2) | 0b10
+    else:
+        print_err(f"Label {im} não definida.")
+
+    return 0
+
+
 def encode_JMP(tokens: list[str], ln: int) -> int:
     if len(tokens) != 1:
         print_err(f"JMP espera 1 operando, recebeu {len(tokens)}: {tokens}")
@@ -158,13 +277,25 @@ def encode_JMP(tokens: list[str], ln: int) -> int:
         except ValueError:
             print_err(f"Imediato octal {im} é inválido.")
 
-
+    # Checa se IM é texto, logo, uma label
     if im in LABELS:
         return (0b00001 << 11) | (LABELS[im] << 2)
     else:
-        print_err(f"Subrotina {im} não definida.")
+        print_err(f"Label {im} não definida.")
 
     return 0
+
+
+
+def encode_CMP(tokens: list[str], ln: int) -> int:
+    rm = clean_reg(clean_token(tokens[0]))
+    rn = clean_reg(clean_token(tokens[1]))
+
+    
+    return (rm << 5) | (rn << 2) | 0b11
+
+
+
 
 # Dicionário de dispatch (atualizar ela pra segunda metade das instruções, caso o Thiago queira)
 
@@ -181,7 +312,14 @@ ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "ORR":  encode_ORR,
     "NOT":  encode_NOT,
     "XOR":  encode_XOR,
-    "JMP":  encode_JMP,    
+    "CMP":  encode_CMP,
+    "JMP":  encode_JMP,
+    "JEQ":  encode_JEQ,
+    "JLT":  encode_JLT,
+    "JGT":  encode_JGT,
+    "PSH":  encode_PSH,
+    "POP":  encode_POP,
+    "#ASSOCIATE": encode_ASSOCIATE    
 }
 
 
