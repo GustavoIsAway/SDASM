@@ -137,9 +137,9 @@ def encode_PSH(tokens: list[str], ln: int) -> int:
     return (clean_reg(clean_token(tokens[0])) << 2) | 0b01
 
 def encode_POP(tokens: list[str], ln: int):
-    if len(tokens) != 0:
-        print_err(f"POP espera 0 operandos, recebeu {len(tokens)}: {tokens}")
-    return 0x0010
+    if len(tokens) != 1:
+        print_err(f"POP espera 1 operandos, recebeu {len(tokens)}: {tokens}")
+    return 0b0010 | (clean_reg(clean_token(tokens[0])) << 8)
 
 def encode_ASSOCIATE(tokens: list[str], ln: int):
     return 0x0000
