@@ -12,7 +12,6 @@ def clean_reg(token: str) -> int:
 
 
 # === OPERADORES NULÁRIOS ===
-
 def encode_NOP(tokens: list[str], ln: int) -> int:
     if len(tokens) != 0:
         print_err(f"NOP espera 0 operandos, recebeu {len(tokens)}: {tokens}")
@@ -327,6 +326,7 @@ def encode_SHL(tokens: list[str], ln: int) -> int:
 
     return (0b11000 << 11) | (rd << 8) | (rm << 5) | im
 
+
 def encode_ROR(tokens: list[str], ln: int) -> int:
     if len(tokens) != 2:
         print_err(f"ROR espera 2 operandos, recebeu {len(tokens)}: {tokens}")
@@ -346,6 +346,31 @@ def encode_ROL(tokens: list[str], ln: int) -> int:
 
 
 # Dicionário de dispatch (atualizar ela pra segunda metade das instruções, caso o Thiago queira)
+
+def encode_IN(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 1:
+        print_err(f"IN espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    rd = clean_reg(clean_token(tokens[0]))
+
+    return (0b11110 << 11) | (rd << 8) | 0b01
+
+def encode_OUT(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 1:
+        print_err(f"IN espera 1 operando, recebeu {len(tokens)}: {tokens}")
+    token = clean_token(tokens[0])
+
+    register = True
+    im = 0
+    rm = 0
+    
+    if (token[0] == '#'): 
+        register = False
+        im = int(token[:1])
+    else:
+        rm = clean_reg(token)
+
+    if (register): return (0b11110 << 11) | (rm << 8) | 0b01
+    else: return (0b11111 << 11) | (im & 16) | ((im << 3) & (0b111 < 8))
 
 ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "NOP":  encode_NOP,
@@ -371,6 +396,8 @@ ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "SHL":  encode_SHL,
     "ROR":  encode_ROR,
     "ROL":  encode_ROL,
+    "IN" :  encode_IN,
+    "OUT":  encode_OUT,
     "#ASSOCIATE": encode_ASSOCIATE    
 }
 

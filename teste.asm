@@ -1,4 +1,2 @@
 SHR R0, R1, #5
 SHL R0, R1, #7
-ROR R0, R4
-ROL R0, R4
