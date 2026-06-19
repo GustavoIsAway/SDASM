@@ -299,6 +299,50 @@ def encode_CMP(tokens: list[str], ln: int) -> int:
     return (rm << 5) | (rn << 2) | 0b11
 
 
+def encode_SHR(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 3:
+        print_err(f"SHR espera 3 operandos, recebeu {len(tokens)}: {tokens}")
+    rd = clean_reg(clean_token(tokens[0]))
+    rm = clean_reg(clean_token(tokens[1]))
+    im = int(clean_token(tokens[2])[1:])
+    im_bits = 5
+
+    if not 0 <= im <= (2**im_bits) - 1:
+        print_err(f"Err SHR: Imediato passado ultrapassa o limite da operação (5 bits).")
+
+    return (0b10110 << 11) | (rd << 8) | (rm << 5) | im
+
+
+def encode_SHL(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 3:
+        print_err(f"SHL espera 3 operandos, recebeu {len(tokens)}: {tokens}")
+    rd = clean_reg(clean_token(tokens[0]))
+    rm = clean_reg(clean_token(tokens[1]))
+    im = int(clean_token(tokens[2])[1:])
+    im_bits = 5
+
+
+    if not 0 <= im <= (2**im_bits) - 1:
+        print_err(f"Err SHR: Imediato passado ultrapassa o limite da operação (5 bits).")
+
+    return (0b11000 << 11) | (rd << 8) | (rm << 5) | im
+
+def encode_ROR(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 2:
+        print_err(f"ROR espera 2 operandos, recebeu {len(tokens)}: {tokens}")
+    rd = clean_reg(clean_token(tokens[0]))
+    rm = clean_reg(clean_token(tokens[1]))
+
+    return (0b11010 << 11) | (rd << 8) | (rm << 5)
+
+
+def encode_ROL(tokens: list[str], ln: int) -> int:
+    if len(tokens) != 2:
+        print_err(f"ROL espera 2 operandos, recebeu {len(tokens)}: {tokens}")
+    rd = clean_reg(clean_token(tokens[0]))
+    rm = clean_reg(clean_token(tokens[1]))
+
+    return (0b11100 << 11) | (rd << 8) | (rm << 5)
 
 
 # Dicionário de dispatch (atualizar ela pra segunda metade das instruções, caso o Thiago queira)
@@ -323,6 +367,10 @@ ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "JGT":  encode_JGT,
     "PSH":  encode_PSH,
     "POP":  encode_POP,
+    "SHR":  encode_SHR,
+    "SHL":  encode_SHL,
+    "ROR":  encode_ROR,
+    "ROL":  encode_ROL,
     "#ASSOCIATE": encode_ASSOCIATE    
 }
 
