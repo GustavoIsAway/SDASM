@@ -1,10 +1,7 @@
 import sys
 
-line_penalty: int = 0
 
-LABELS = {
-    "_START": 0x00
-}
+LABELS: dict[str, int] = {}
 
 error_warning = 0
 
@@ -23,7 +20,7 @@ def reg_number(reg: str) -> int:
     if not reg.startswith("R") or not reg[1:].isdigit():
         print_err(f"Registrador inválido: '{reg}'")
     n = int(reg[1:])
-    if n < 0 or n > 7:
+    if n < 0 or n > 7: 
         print_err(f"Registrador fora do range (R0-R7): '{reg}'")
     return n
 
@@ -61,9 +58,9 @@ def bits_to_hex(value: int, width: int = 16) -> str:
 
 
 def check_for_subroutine(token: str, line: int) -> bool:
+    """Apenas verifica se o token é uma label (termina com ':').
+    O endereço real já foi registrado no primeiro passo em sdasm.py."""
     cleaned_token = token.rstrip()
-    if cleaned_token[-1] == ":" and not token[0].isdigit():
-        if cleaned_token[:-1] not in LABELS:
-            LABELS[cleaned_token[:-1]] = int(line) - 2
-        return True  # ← retorna True mesmo se já existia
+    if cleaned_token and cleaned_token[-1] == ":" and not token[0].isdigit():
+        return True
     return False
