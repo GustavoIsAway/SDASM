@@ -74,6 +74,7 @@ def main():
 
     status = "Assembler montou com avisos" if error_warning else "Montagem perfeita"
     print(f"{status}: {len(encoded)} {'instrução' if len(encoded) == 1 else 'instruções'} -> '{out_path}'")
+    print(LABELS)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import sys
 
+line_penalty: int = 0
 
 LABELS = {
     "_START": 0x00
