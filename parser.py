@@ -356,21 +356,17 @@ def encode_IN(tokens: list[str], ln: int) -> int:
 
 def encode_OUT(tokens: list[str], ln: int) -> int:
     if len(tokens) != 1:
-        print_err(f"IN espera 1 operando, recebeu {len(tokens)}: {tokens}")
+        print_err(f"OUT espera 1 operando, recebeu {len(tokens)}: {tokens}")
     token = clean_token(tokens[0])
 
-    register = True
-    im = 0
-    rm = 0
-    
-    if (token[0] == '#'): 
-        register = False
-        im = int(token[:1])
+    if token[0] == '#':
+        im = parse_immediate(token, 8)
+        im_hi = (im >> 5) & 0b111
+        im_lo = im & 0b11111
+        return (0b11111 << 11) | (im_hi << 8) | im_lo
     else:
         rm = clean_reg(token)
-
-    if (register): return (0b11110 << 11) | (rm << 8) | 0b01
-    else: return (0b11111 << 11) | (im & 16) | ((im << 3) & (0b111 < 8))
+        return (0b11110 << 11) | (rm << 5) | 0b10
 
 ENCODERS = {    # Armazena ponteiros das funções, sem executá-las
     "NOP":  encode_NOP,
